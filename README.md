@@ -1,0 +1,1 @@
+Ubiety.Logging.Core
