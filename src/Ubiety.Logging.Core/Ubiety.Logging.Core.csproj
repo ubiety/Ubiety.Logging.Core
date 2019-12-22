@@ -4,4 +4,9 @@
         <TargetFramework>netstandard2.0</TargetFramework>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
+      <PackageReference Include="Ubiety.StyleCop" Version="0.0.5" />
+    </ItemGroup>
+
 </Project>
