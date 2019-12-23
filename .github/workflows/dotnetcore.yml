@@ -1,4 +1,4 @@
-name: .NET Core
+name: Build Ubiety.Logging.Core
 
 on: [push]
 
@@ -13,5 +13,5 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 2.2.402
-    - name: Build with dotnet
-      run: build.sh
+    - name: Build with Nuke
+      run: ./build.sh
