@@ -2,15 +2,15 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-    <RootNamespace></RootNamespace>
-    <IsPackable>False</IsPackable>
+    <IsPackable>True</IsPackable>
     <NoWarn>CS0649;CS0169</NoWarn>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nuke.Common" Version="0.23.4" />
+    <PackageReference Include="Nuke.Common" Version="0.22.2" />
   </ItemGroup>
 
   <ItemGroup>
