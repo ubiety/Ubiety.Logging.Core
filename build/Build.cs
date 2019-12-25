@@ -1,4 +1,5 @@
 using Nuke.Common;
+using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.Execution;
 using Nuke.Common.Git;
 using Nuke.Common.ProjectModel;
@@ -12,6 +13,11 @@ using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.DotNetSonarScanner.DotNetSonarScannerTasks;
 
+[GitHubActions("dotnetcore",
+    GitHubActionsImage.UbuntuLatest,
+    GitHubActionsImage.WindowsLatest,
+    On = new[] {GitHubActionsTrigger.Push},
+    InvokedTargets = new []{nameof(SonarEnd)})]
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
 class Build : NukeBuild
@@ -26,12 +32,12 @@ class Build : NukeBuild
 
     readonly string NuGetSource = "https://api.nuget.org/v3/index.json";
 
-    [Solution] static readonly Solution Solution;
+    [Solution] readonly Solution Solution;
 
     [Parameter] readonly string SonarKey;
     readonly string SonarProjectKey = "ubiety_Ubiety.Logging.Core";
 
-    readonly Project UbietyLoggingCoreProject = Solution.GetProject("Ubiety.Logging.Core");
+    Project UbietyLoggingCoreProject => Solution.GetProject("Ubiety.Logging.Core");
 
     AbsolutePath SourceDirectory => RootDirectory / "src";
     AbsolutePath TestsDirectory => RootDirectory / "tests";
@@ -58,10 +64,12 @@ class Build : NukeBuild
         .Executes(() =>
         {
             var settings = GitVersion is null
-                ? new DotNetBuildSettings().SetProjectFile(UbietyLoggingCoreProject)
+                ? new DotNetBuildSettings()
+                    .SetProjectFile(UbietyLoggingCoreProject)
                     .SetConfiguration(Configuration)
                     .EnableNoRestore()
-                : new DotNetBuildSettings().SetProjectFile(UbietyLoggingCoreProject)
+                : new DotNetBuildSettings()
+                    .SetProjectFile(UbietyLoggingCoreProject)
                     .SetConfiguration(Configuration)
                     .SetAssemblyVersion(GitVersion.AssemblySemVer)
                     .SetFileVersion(GitVersion.AssemblySemFileVer)
@@ -145,8 +153,5 @@ class Build : NukeBuild
     Target Appveyor => _ => _
         .DependsOn(SonarEnd, Publish);
 
-    public static int Main()
-    {
-        return Execute<Build>(x => x.Compile);
-    }
+    public static int Main() => Execute<Build>(x => x.Compile);
 }
