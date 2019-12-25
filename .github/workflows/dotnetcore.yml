@@ -11,7 +11,7 @@ jobs:
       - name: Install .NET 3.1
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 3.1
+          dotnet-version: '3.1.100'
       - name: Install Sonar Scanner tool
         run: dotnet tool install --global dotnet-sonarscanner
       - name: Run './build.sh SonarEnd'
