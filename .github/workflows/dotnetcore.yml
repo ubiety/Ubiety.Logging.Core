@@ -21,7 +21,7 @@ jobs:
           git branch --create-reflog ${{steps.extract_branch.outputs.branch}} origin/${{steps.extract_branch.outputs.branch}}
       - name: Install .NET 3.1
         uses: actions/setup-dotnet@v1
-        if: matrix.os != windows-latest
+        if: matrix.os != 'windows-latest'
         with:
           dotnet-version: '3.1.100'
       - name: Install GitVersion
