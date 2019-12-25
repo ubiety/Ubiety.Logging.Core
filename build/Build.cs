@@ -13,11 +13,11 @@ using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.DotNetSonarScanner.DotNetSonarScannerTasks;
 
-[GitHubActions("dotnetcore",
-    GitHubActionsImage.UbuntuLatest,
-    GitHubActionsImage.WindowsLatest,
-    On = new[] {GitHubActionsTrigger.Push},
-    InvokedTargets = new []{nameof(SonarEnd)})]
+// [GitHubActions("dotnetcore",
+//     GitHubActionsImage.UbuntuLatest,
+//     GitHubActionsImage.WindowsLatest,
+//     On = new[] {GitHubActionsTrigger.Push},
+//     InvokedTargets = new []{nameof(SonarEnd)})]
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
 class Build : NukeBuild
