@@ -27,7 +27,6 @@ class Build : NukeBuild
 
     [Parameter] readonly bool? Cover = true;
     [GitRepository] readonly GitRepository GitRepository;
-    [GitVersion(DisableOnUnix = true)] readonly GitVersion GitVersion;
     [Parameter] readonly string NuGetKey;
 
     readonly string NuGetSource = "https://api.nuget.org/v3/index.json";
@@ -37,6 +36,11 @@ class Build : NukeBuild
     [Parameter] readonly string SonarKey;
     readonly string SonarProjectKey = "ubiety_Ubiety.Logging.Core";
 
+    [Parameter] readonly string AssemblyFileVer;
+    [Parameter] readonly string AssemblySemVer;
+    [Parameter] readonly string InformationalVersion;
+    [Parameter] readonly string NuGetVersion;
+    
     Project UbietyLoggingCoreProject => Solution.GetProject("Ubiety.Logging.Core");
 
     AbsolutePath SourceDirectory => RootDirectory / "src";
@@ -63,17 +67,12 @@ class Build : NukeBuild
         .DependsOn(Restore)
         .Executes(() =>
         {
-            var settings = GitVersion is null
-                ? new DotNetBuildSettings()
+            var settings =  new DotNetBuildSettings()
                     .SetProjectFile(UbietyLoggingCoreProject)
                     .SetConfiguration(Configuration)
-                    .EnableNoRestore()
-                : new DotNetBuildSettings()
-                    .SetProjectFile(UbietyLoggingCoreProject)
-                    .SetConfiguration(Configuration)
-                    .SetAssemblyVersion(GitVersion.AssemblySemVer)
-                    .SetFileVersion(GitVersion.AssemblySemFileVer)
-                    .SetInformationalVersion(GitVersion.InformationalVersion)
+                    .SetAssemblyVersion(AssemblySemVer)
+                    .SetFileVersion(AssemblyFileVer)
+                    .SetInformationalVersion(InformationalVersion)
                     .EnableNoRestore();
 
             DotNetBuild(settings);
@@ -90,7 +89,7 @@ class Build : NukeBuild
                 .SetProjectKey(SonarProjectKey)
                 .SetOrganization("ubiety")
                 .SetServer("https://sonarcloud.io")
-                .SetVersion(GitVersion.NuGetVersionV2)
+                .SetVersion(NuGetVersion)
                 .SetOpenCoverPaths(ArtifactsDirectory / "coverage.opencover.xml"));
         });
 
@@ -130,7 +129,7 @@ class Build : NukeBuild
                 .SetProject(UbietyLoggingCoreProject)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
-                .SetVersion(GitVersion.NuGetVersionV2));
+                .SetVersion(NuGetVersion));
         });
 
     Target Publish => _ => _
