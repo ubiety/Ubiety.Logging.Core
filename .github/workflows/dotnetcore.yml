@@ -33,6 +33,7 @@ jobs:
           beginArguments: /d:sonar.verbose="true" /v:${{steps.gitversion.outputs.nuGetVersionV2}}
         env:
           SONAR_TOKEN: ${{secrets.SONAR_KEY}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           AssemblyFileVer: ${{steps.gitversion.outputs.assemblySemFileVer}}
           AssemblySemVer: ${{steps.gitversion.outputs.assemblySemVer}}
           InformationalVersion: ${{steps.gitversion.outputs.informationalVersion}}
