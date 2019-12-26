@@ -31,15 +31,16 @@ jobs:
       - name: Run GitVersion
         id: gitversion
         uses: gittools/actions/execute-gitversion@v0.3.1
-      - name: Install Sonar Scanner tool
-        run: dotnet tool install --global dotnet-sonarscanner
-      - name: Run build script
-        run: |
-          dotnet tool list
-          dotnet tool install --tool-path . dotnet-sonarscanner
-          ./build.sh SonarEnd
+      - name: Run build script with Sonar Scanner
+        uses: Secbyte/dotnet-sonarscanner@v1.2
+        with:
+          buildCommand: ./build.sh
+          projectKey: ubiety_Ubiety.Logging.Core
+          sonarOrganization: ubiety
+          projectName: Ubiety.Logging.Core
+          beginArguments: /d:sonar.verbose="true" /v:${{steps.gitversion.outputs.nuGetVersionV2}}
         env:
-          SonarKey: ${{secrets.SONAR_KEY}}
+          SONAR_TOKEN: ${{secrets.SONAR_KEY}}
           AssemblyFileVer: ${{steps.gitversion.outputs.assemblySemFileVer}}
           AssemblySemVer: ${{steps.gitversion.outputs.assemblySemVer}}
           InformationalVersion: ${{steps.gitversion.outputs.informationalVersion}}
