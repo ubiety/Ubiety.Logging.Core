@@ -70,12 +70,12 @@ namespace Ubiety.Logging.Core
 
                 public void Log(LogLevel level, object message)
                 {
-                    throw new NotImplementedException();
+                    Log(level, $"{message}");
                 }
 
                 public void Log(LogLevel level, object message, Exception exception)
                 {
-                    throw new NotImplementedException();
+                    Log(level, $"{message}{Environment.NewLine}{exception}");
                 }
 
                 private void Log(LogLevel level, string message)
