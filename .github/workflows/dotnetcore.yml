@@ -5,10 +5,7 @@ on: [push]
 jobs:
   build:
     name: Build
-    runs-on: ${{matrix.os}}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - name: Extract branch name
@@ -19,11 +16,6 @@ jobs:
         run: |
           git fetch --tags
           git branch --create-reflog ${{steps.extract_branch.outputs.branch}} origin/${{steps.extract_branch.outputs.branch}}
-      - name: Install .NET 3.0 on Windows
-        uses: actions/setup-dotnet@v1
-        if: matrix.os == 'windows-latest'
-        with:
-          dotnet-version: '3.0.101'
       - name: Install GitVersion
         uses: gittools/actions/setup-gitversion@v0.3.1
         with:
