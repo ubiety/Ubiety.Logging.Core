@@ -8,6 +8,7 @@
     <NoWarn>CS0649;CS0169</NoWarn>
     <LangVersion>latest</LangVersion>
     <Nullable>annotations</Nullable>
+    <SonarQubeExclude>true</SonarQubeExclude>
   </PropertyGroup>
 
   <ItemGroup>
