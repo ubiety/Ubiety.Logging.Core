@@ -28,7 +28,7 @@ jobs:
         with:
           buildCommand: ./build.sh
           projectKey: ubiety_Ubiety.Logging.Core
-          sonarOrganization: ubiety
+          sonarOrganisation: ubiety
           projectName: Ubiety.Logging.Core
           beginArguments: /d:sonar.verbose="true" /v:${{steps.gitversion.outputs.nuGetVersionV2}}
         env:
