@@ -35,7 +35,7 @@ jobs:
 #        run: dotnet tool install --tool-path . dotnet-sonarscanner
       - name: Run build script
         run: |
-          dotnet tool install --global dotnet-sonarscanner
+          dotnet tool install --tool-path . dotnet-sonarscanner
           ./build.sh SonarEnd
         env:
           SonarKey: ${{secrets.SONAR_KEY}}
