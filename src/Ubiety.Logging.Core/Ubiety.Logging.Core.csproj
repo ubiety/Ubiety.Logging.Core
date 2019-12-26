@@ -3,6 +3,7 @@
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <DocumentationFile>bin/$(Configuration)/$(TargetFramework)/$(AssemblyName).xml</DocumentationFile>
+        <ProjectGuid>f4ad3b2b-f824-4091-8c46-2ed47f723958</ProjectGuid>
     </PropertyGroup>
 
     <ItemGroup>
