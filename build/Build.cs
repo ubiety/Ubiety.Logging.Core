@@ -28,6 +28,7 @@ class Build : NukeBuild
 
     [Parameter] readonly bool? Cover = true;
     readonly string GithubSource = "https://nuget.pkg.github.com/ubiety/index.json";
+    [Parameter] readonly string GITHUB_TOKEN;
     [GitRepository] readonly GitRepository GitRepository;
     [Parameter] readonly string InformationalVersion;
     [Parameter] readonly string NuGetKey;
@@ -150,6 +151,7 @@ class Build : NukeBuild
         {
             DotNetNuGetPush(s => s
                     .SetSource(GithubSource)
+                    .SetApiKey(GITHUB_TOKEN)
                     .CombineWith(ArtifactsDirectory.GlobFiles("*.nupkg").NotEmpty(), (cs, v) =>
                         cs.SetTargetPath(v)),
                 5,
