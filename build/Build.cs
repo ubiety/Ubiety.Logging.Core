@@ -117,7 +117,6 @@ class Build : NukeBuild
     Target Pack => _ => _
         // .After(Test)
         .After(Compile)
-        .OnlyWhenStatic(() => GitRepository.IsOnMasterBranch())
         .Executes(() =>
         {
             DotNetPack(s => s
