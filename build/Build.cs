@@ -27,8 +27,7 @@ class Build : NukeBuild
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
     [Parameter] readonly bool? Cover = true;
-    readonly string GithubSource = "https://nuget.pkg.github.com/ubiety/index.json";
-    [Parameter] readonly string GITHUB_TOKEN;
+    readonly string GithubSource = "github";
     [GitRepository] readonly GitRepository GitRepository;
     [Parameter] readonly string InformationalVersion;
     [Parameter] readonly string NuGetKey;
@@ -80,10 +79,12 @@ class Build : NukeBuild
 
     Target SonarBegin => _ => _
         .Before(Compile)
+        .Requires(() => SonarKey)
         .Unlisted()
         .Executes(() =>
         {
             DotNetSonarScannerBegin(s => s
+                .SetLogin(SonarKey)
                 .SetProjectKey(SonarProjectKey)
                 .SetOrganization("ubiety")
                 .SetServer("https://sonarcloud.io")
@@ -92,28 +93,28 @@ class Build : NukeBuild
         });
 
     Target SonarEnd => _ => _
-        // .After(Test)
+        .After(Test)
         .After(Compile)
         .DependsOn(SonarBegin)
+        .Requires(() => SonarKey)
         .Unlisted()
         .Executes(() =>
         {
-            DotNetSonarScannerEnd();
+            DotNetSonarScannerEnd(s => s.SetLogin(SonarKey));
         });
 
-    // Target Test => _ => _
-    //     .DependsOn(Compile)
-    //     .Executes(() =>
-    //     {
-    //         DotNetTest(s => s
-    //             .SetProjectFile(UbietyDnsTestProject)
-    //             .EnableNoBuild()
-    //             .SetConfiguration(Configuration)
-    //             .SetArgumentConfigurator(args => args.Add("/p:CollectCoverage={0}", Cover)
-    //                 .Add("/p:CoverletOutput={0}", ArtifactsDirectory / "coverage")
-    //                 .Add("/p:CoverletOutputFormat={0}", "opencover")
-    //                 .Add("/p:Exclude={0}", "[xunit.*]*")));
-    //     });
+    Target Test => _ => _
+        .DependsOn(Compile)
+        .Executes(() =>
+        {
+            DotNetTest(s => s
+                .EnableNoBuild()
+                .SetConfiguration(Configuration)
+                .SetArgumentConfigurator(args => args.Add("/p:CollectCoverage={0}", Cover)
+                    .Add("/p:CoverletOutput={0}", ArtifactsDirectory / "coverage")
+                    .Add("/p:CoverletOutputFormat={0}", "opencover")
+                    .Add("/p:Exclude={0}", "[xunit.*]*")));
+        });
 
     Target Pack => _ => _
         // .After(Test)
@@ -151,7 +152,6 @@ class Build : NukeBuild
         {
             DotNetNuGetPush(s => s
                     .SetSource(GithubSource)
-                    .SetApiKey(GITHUB_TOKEN)
                     .CombineWith(ArtifactsDirectory.GlobFiles("*.nupkg").NotEmpty(), (cs, v) =>
                         cs.SetTargetPath(v)),
                 5,
@@ -159,7 +159,7 @@ class Build : NukeBuild
         });
 
     Target Github => _ => _
-        .DependsOn(Compile, PublishGithub);
+        .DependsOn(Compile, PublishGithub, Publish);
 
     Target Appveyor => _ => _
         .DependsOn(SonarEnd, Publish);
