@@ -79,12 +79,10 @@ class Build : NukeBuild
 
     Target SonarBegin => _ => _
         .Before(Compile)
-        .Requires(() => SonarKey)
         .Unlisted()
         .Executes(() =>
         {
             DotNetSonarScannerBegin(s => s
-                .SetLogin(SonarKey)
                 .SetProjectKey(SonarProjectKey)
                 .SetOrganization("ubiety")
                 .SetServer("https://sonarcloud.io")
@@ -96,12 +94,10 @@ class Build : NukeBuild
         // .After(Test)
         .After(Compile)
         .DependsOn(SonarBegin)
-        .Requires(() => SonarKey)
         .Unlisted()
         .Executes(() =>
         {
-            DotNetSonarScannerEnd(s => s
-                .SetLogin(SonarKey));
+            DotNetSonarScannerEnd();
         });
 
     // Target Test => _ => _
