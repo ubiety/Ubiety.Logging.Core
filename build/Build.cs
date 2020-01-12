@@ -1,12 +1,10 @@
 using Nuke.Common;
-using Nuke.Common.CI.GitHubActions;
 using Nuke.Common.Execution;
 using Nuke.Common.Git;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.DotNetSonarScanner;
-using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
@@ -22,25 +20,26 @@ using static Nuke.Common.Tools.DotNetSonarScanner.DotNetSonarScannerTasks;
 [UnsetVisualStudioEnvironmentVariables]
 class Build : NukeBuild
 {
+    [Parameter] readonly string AssemblyFileVer;
+    [Parameter] readonly string AssemblySemVer;
+
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
     [Parameter] readonly bool? Cover = true;
+    readonly string GithubSource = "https://nuget.pkg.github.com/ubiety/index.json";
     [GitRepository] readonly GitRepository GitRepository;
+    [Parameter] readonly string InformationalVersion;
     [Parameter] readonly string NuGetKey;
 
     readonly string NuGetSource = "https://api.nuget.org/v3/index.json";
+    [Parameter] readonly string NuGetVersion;
 
     [Solution] readonly Solution Solution;
 
     [Parameter] readonly string SonarKey;
     readonly string SonarProjectKey = "ubiety_Ubiety.Logging.Core";
 
-    [Parameter] readonly string AssemblyFileVer;
-    [Parameter] readonly string AssemblySemVer;
-    [Parameter] readonly string InformationalVersion;
-    [Parameter] readonly string NuGetVersion;
-    
     Project UbietyLoggingCoreProject => Solution.GetProject("Ubiety.Logging.Core");
 
     AbsolutePath SourceDirectory => RootDirectory / "src";
@@ -67,13 +66,13 @@ class Build : NukeBuild
         .DependsOn(Restore)
         .Executes(() =>
         {
-            var settings =  new DotNetBuildSettings()
-                    .SetProjectFile(UbietyLoggingCoreProject)
-                    .SetConfiguration(Configuration)
-                    .SetAssemblyVersion(AssemblySemVer)
-                    .SetFileVersion(AssemblyFileVer)
-                    .SetInformationalVersion(InformationalVersion)
-                    .EnableNoRestore();
+            var settings = new DotNetBuildSettings()
+                .SetProjectFile(UbietyLoggingCoreProject)
+                .SetConfiguration(Configuration)
+                .SetAssemblyVersion(AssemblySemVer)
+                .SetFileVersion(AssemblyFileVer)
+                .SetInformationalVersion(InformationalVersion)
+                .EnableNoRestore();
 
             DotNetBuild(settings);
         });
@@ -121,6 +120,7 @@ class Build : NukeBuild
 
     Target Pack => _ => _
         // .After(Test)
+        .After(Compile)
         .OnlyWhenStatic(() => GitRepository.IsOnMasterBranch())
         .Executes(() =>
         {
@@ -149,8 +149,23 @@ class Build : NukeBuild
                 true);
         });
 
+    Target PublishGithub => _ => _
+        .DependsOn(Pack)
+        .Executes(() =>
+        {
+            DotNetNuGetPush(s => s
+                    .SetSource(GithubSource)
+                    .CombineWith(ArtifactsDirectory.GlobFiles("*.nupkg").NotEmpty(), (cs, v) =>
+                        cs.SetTargetPath(v)),
+                5,
+                true);
+        });
+
+    Target Github => _ => _
+        .DependsOn(SonarEnd, PublishGithub);
+
     Target Appveyor => _ => _
         .DependsOn(SonarEnd, Publish);
 
-    public static int Main() => Execute<Build>(x => x.Compile);
+    public static int Main() => Execute<Build>(x => x.Github);
 }
