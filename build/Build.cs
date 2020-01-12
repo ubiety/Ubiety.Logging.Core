@@ -158,7 +158,7 @@ class Build : NukeBuild
         });
 
     Target Github => _ => _
-        .DependsOn(SonarEnd, PublishGithub);
+        .DependsOn(Compile, PublishGithub);
 
     Target Appveyor => _ => _
         .DependsOn(SonarEnd, Publish);
