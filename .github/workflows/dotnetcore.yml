@@ -7,6 +7,10 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
+      - name: Install GitVersion
+        uses: gittools/actions/setup-gitversion@v0.3.1
+        with:
+          versionSpec: '5.1.x'
       - uses: actions/checkout@v1
       - name: Extract branch name
         shell: bash
@@ -16,10 +20,6 @@ jobs:
         run: |
           git fetch --tags
           git branch --create-reflog ${{steps.extract_branch.outputs.branch}} origin/${{steps.extract_branch.outputs.branch}}
-      - name: Install GitVersion
-        uses: gittools/actions/setup-gitversion@v0.3.1
-        with:
-          versionSpec: '5.1.x'
       - name: Run GitVersion
         id: gitversion
         uses: gittools/actions/execute-gitversion@v0.3.1
