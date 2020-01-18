@@ -119,6 +119,7 @@ class Build : NukeBuild
     Target Pack => _ => _
         // .After(Test)
         .After(Compile)
+        .Requires(() => Configuration.Equals(Configuration.Release))
         .Executes(() =>
         {
             DotNetPack(s => s
@@ -148,6 +149,8 @@ class Build : NukeBuild
 
     Target PublishGithub => _ => _
         .DependsOn(Pack)
+        .Requires(() => Configuration.Equals(Configuration.Release))
+        .OnlyWhenStatic(() => GitRepository.IsOnDevelopBranch())
         .Executes(() =>
         {
             DotNetNuGetPush(s => s
