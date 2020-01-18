@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <DocumentationFile>bin/$(Configuration)/$(TargetFramework)/$(AssemblyName).xml</DocumentationFile>
+        <ProjectGuid>f4ad3b2b-f824-4091-8c46-2ed47f723958</ProjectGuid>
+    </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>Ubiety.Logging.Core</PackageId>
+    <Authors>Dieter (coder2000) Lunn</Authors>
+    <PackageDescription>Generic logging interface for class libraries.</PackageDescription>
+    <RepositoryUrl>https://github.com/ubiety/Ubiety.Logging.Core</RepositoryUrl>
+  </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
+      <PackageReference Include="Ubiety.StyleCop" Version="0.0.5" />
+    </ItemGroup>
+
+</Project>
