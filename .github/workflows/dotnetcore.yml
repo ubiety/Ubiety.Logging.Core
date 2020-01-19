@@ -10,7 +10,7 @@ jobs:
       - name: Install GitVersion
         uses: gittools/actions/setup-gitversion@v0.3.1
         with:
-          versionSpec: '5.1.x'
+          versionSpec: "5.1.x"
       - uses: actions/checkout@v1
       - name: Extract branch name
         shell: bash
@@ -38,3 +38,4 @@ jobs:
           AssemblySemVer: ${{steps.gitversion.outputs.assemblySemVer}}
           InformationalVersion: ${{steps.gitversion.outputs.informationalVersion}}
           NuGetVersion: ${{steps.gitversion.outputs.nuGetVersionV2}}
+          NuGetKey: ${{secrets.NUGET_KEY}}

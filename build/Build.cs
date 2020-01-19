@@ -5,6 +5,7 @@ using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.DotNetSonarScanner;
+using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
@@ -66,6 +67,14 @@ class Build : NukeBuild
         .DependsOn(Restore)
         .Executes(() =>
         {
+            Logger.Info($"Build Configuration: {Configuration}");
+            Logger.Info($"Current Branch: {GitRepository.Branch}");
+            Logger.Info($"Current Head: ${GitRepository.Head}");
+            Logger.Info($"IsOnDevelopBranch Value: {GitRepository.IsOnDevelopBranch()}");
+            Logger.Info($"IsOnMasterBranch Value: {GitRepository.IsOnMasterBranch()}");
+            Logger.Info($"IsDevelop Value: {IsDevelop()}");
+            Logger.Info($"IsMaster Value: {IsMaster()}");
+
             var settings = new DotNetBuildSettings()
                 .SetProjectFile(UbietyLoggingCoreProject)
                 .SetConfiguration(Configuration)
@@ -118,7 +127,8 @@ class Build : NukeBuild
 
     Target Pack => _ => _
         // .After(Test)
-        .After(Compile)
+        .DependsOn(Compile)
+        .Requires(() => Configuration.Equals(Configuration.Release))
         .Executes(() =>
         {
             DotNetPack(s => s
@@ -129,11 +139,11 @@ class Build : NukeBuild
                 .SetVersion(NuGetVersion));
         });
 
-    Target Publish => _ => _
+    Target PublishNuGet => _ => _
         .DependsOn(Pack)
         .Requires(() => NuGetKey)
         .Requires(() => Configuration.Equals(Configuration.Release))
-        .OnlyWhenStatic(() => GitRepository.IsOnMasterBranch())
+        .OnlyWhenStatic(() => IsMaster())
         .Executes(() =>
         {
             DotNetNuGetPush(s => s
@@ -148,6 +158,8 @@ class Build : NukeBuild
 
     Target PublishGithub => _ => _
         .DependsOn(Pack)
+        .Requires(() => Configuration.Equals(Configuration.Release))
+        .OnlyWhenStatic(() => IsDevelop())
         .Executes(() =>
         {
             DotNetNuGetPush(s => s
@@ -159,10 +171,20 @@ class Build : NukeBuild
         });
 
     Target Github => _ => _
-        .DependsOn(Compile, PublishGithub, Publish);
+        .DependsOn(PublishGithub, PublishNuGet);
 
     Target Appveyor => _ => _
-        .DependsOn(SonarEnd, Publish);
+        .DependsOn(SonarEnd, PublishNuGet);
+
+    private bool IsMaster()
+    {
+        return GitRepository.Branch?.ContainsOrdinalIgnoreCase("master") ?? false;
+    }
+
+    private bool IsDevelop()
+    {
+        return GitRepository.Branch?.ContainsOrdinalIgnoreCase("develop") ?? false;
+    }
 
     public static int Main() => Execute<Build>(x => x.Github);
 }
