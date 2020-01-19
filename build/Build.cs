@@ -66,6 +66,11 @@ class Build : NukeBuild
         .DependsOn(Restore)
         .Executes(() =>
         {
+            Logger.Info($"Build Configuration: {Configuration}");
+            Logger.Info($"Current Branch: {GitRepository.Branch}");
+            Logger.Info($"IsOnDevelopBranch Value: {GitRepository.IsOnDevelopBranch()}");
+            Logger.Info($"IsOnMasterBranch Value: {GitRepository.IsOnMasterBranch()}");
+
             var settings = new DotNetBuildSettings()
                 .SetProjectFile(UbietyLoggingCoreProject)
                 .SetConfiguration(Configuration)
@@ -118,7 +123,7 @@ class Build : NukeBuild
 
     Target Pack => _ => _
         // .After(Test)
-        .After(Compile)
+        .DependsOn(Compile)
         .Requires(() => Configuration.Equals(Configuration.Release))
         .Executes(() =>
         {
@@ -130,7 +135,7 @@ class Build : NukeBuild
                 .SetVersion(NuGetVersion));
         });
 
-    Target Publish => _ => _
+    Target PublishNuGet => _ => _
         .DependsOn(Pack)
         .Requires(() => NuGetKey)
         .Requires(() => Configuration.Equals(Configuration.Release))
@@ -162,10 +167,10 @@ class Build : NukeBuild
         });
 
     Target Github => _ => _
-        .DependsOn(Compile, PublishGithub, Publish);
+        .DependsOn(PublishGithub, PublishNuGet);
 
     Target Appveyor => _ => _
-        .DependsOn(SonarEnd, Publish);
+        .DependsOn(SonarEnd, PublishNuGet);
 
     public static int Main() => Execute<Build>(x => x.Github);
 }
