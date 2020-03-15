@@ -5,7 +5,7 @@ on: [push]
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Install GitVersion
         uses: gittools/actions/setup-gitversion@v0.3.1
