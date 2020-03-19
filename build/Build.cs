@@ -129,7 +129,7 @@ class Build : NukeBuild
                 .SetProject(UbietyLoggingCoreProject)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
-                .SetVersion(NuGetVersion));
+                .SetVersion(GitVersion.NuGetVersionV2));
         });
 
     Target PublishNuGet => _ => _
