@@ -1,10 +1,12 @@
 using Nuke.Common;
 using Nuke.Common.Execution;
 using Nuke.Common.Git;
+using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.DotNetSonarScanner;
+using Nuke.Common.Tools.GitVersion;
 using Nuke.Common.Utilities;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.IO.FileSystemTasks;
@@ -12,29 +14,20 @@ using static Nuke.Common.IO.PathConstruction;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.DotNetSonarScanner.DotNetSonarScannerTasks;
 
-// [GitHubActions("dotnetcore",
-//     GitHubActionsImage.UbuntuLatest,
-//     GitHubActionsImage.WindowsLatest,
-//     On = new[] {GitHubActionsTrigger.Push},
-//     InvokedTargets = new []{nameof(SonarEnd)})]
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
 class Build : NukeBuild
 {
-    [Parameter] readonly string AssemblyFileVer;
-    [Parameter] readonly string AssemblySemVer;
-
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
     [Parameter] readonly bool? Cover = true;
-    readonly string GithubSource = "github";
     [GitRepository] readonly GitRepository GitRepository;
-    [Parameter] readonly string InformationalVersion;
     [Parameter] readonly string NuGetKey;
 
+    [GitVersion(DisableOnUnix = true)] readonly GitVersion GitVersion;
+
     readonly string NuGetSource = "https://api.nuget.org/v3/index.json";
-    [Parameter] readonly string NuGetVersion;
 
     [Solution] readonly Solution Solution;
 
@@ -78,9 +71,9 @@ class Build : NukeBuild
             var settings = new DotNetBuildSettings()
                 .SetProjectFile(UbietyLoggingCoreProject)
                 .SetConfiguration(Configuration)
-                .SetAssemblyVersion(AssemblySemVer)
-                .SetFileVersion(AssemblyFileVer)
-                .SetInformationalVersion(InformationalVersion)
+                .SetAssemblyVersion(GitVersion.AssemblySemVer)
+                .SetFileVersion(GitVersion.AssemblySemFileVer)
+                .SetInformationalVersion(GitVersion.InformationalVersion)
                 .EnableNoRestore();
 
             DotNetBuild(settings);
@@ -97,7 +90,7 @@ class Build : NukeBuild
                 .SetProjectKey(SonarProjectKey)
                 .SetOrganization("ubiety")
                 .SetServer("https://sonarcloud.io")
-                .SetVersion(NuGetVersion)
+                .SetVersion(GitVersion.NuGetVersionV2)
                 .SetOpenCoverPaths(ArtifactsDirectory / "coverage.opencover.xml"));
         });
 
@@ -136,7 +129,7 @@ class Build : NukeBuild
                 .SetProject(UbietyLoggingCoreProject)
                 .SetConfiguration(Configuration)
                 .SetOutputDirectory(ArtifactsDirectory)
-                .SetVersion(NuGetVersion));
+                .SetVersion(GitVersion.NuGetVersionV2));
         });
 
     Target PublishNuGet => _ => _
@@ -156,23 +149,6 @@ class Build : NukeBuild
                 true);
         });
 
-    Target PublishGithub => _ => _
-        .DependsOn(Pack)
-        .Requires(() => Configuration.Equals(Configuration.Release))
-        .OnlyWhenStatic(() => IsDevelop())
-        .Executes(() =>
-        {
-            DotNetNuGetPush(s => s
-                    .SetSource(GithubSource)
-                    .CombineWith(ArtifactsDirectory.GlobFiles("*.nupkg").NotEmpty(), (cs, v) =>
-                        cs.SetTargetPath(v)),
-                5,
-                true);
-        });
-
-    Target Github => _ => _
-        .DependsOn(PublishGithub, PublishNuGet);
-
     Target Appveyor => _ => _
         .DependsOn(SonarEnd, PublishNuGet);
 
@@ -186,5 +162,5 @@ class Build : NukeBuild
         return GitRepository.Branch?.ContainsOrdinalIgnoreCase("develop") ?? false;
     }
 
-    public static int Main() => Execute<Build>(x => x.Github);
+    public static int Main() => Execute<Build>(x => x.Compile);
 }
