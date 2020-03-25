@@ -11,11 +11,21 @@
     <Authors>Dieter (coder2000) Lunn</Authors>
     <PackageDescription>Generic logging interface for class libraries.</PackageDescription>
     <RepositoryUrl>https://github.com/ubiety/Ubiety.Logging.Core</RepositoryUrl>
+    <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+    <PackageTags>ubiety;logging</PackageTags>
+    <PackageIcon>logs64.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" />
-    <PackageReference Include="Ubiety.StyleCop" Version="0.0.5" />
+    <None Include="images\logs64.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Ubiety.StyleCop" Version="0.0.5" PrivateAssets="all" />
   </ItemGroup>
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4')) and '$(OS)' == 'Unix'">

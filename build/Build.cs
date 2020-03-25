@@ -1,6 +1,7 @@
 using Nuke.Common;
 using Nuke.Common.Execution;
 using Nuke.Common.Git;
+using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
@@ -60,14 +61,6 @@ class Build : NukeBuild
         .DependsOn(Restore)
         .Executes(() =>
         {
-            Logger.Info($"Build Configuration: {Configuration}");
-            Logger.Info($"Current Branch: {GitRepository.Branch}");
-            Logger.Info($"Current Head: ${GitRepository.Head}");
-            Logger.Info($"IsOnDevelopBranch Value: {GitRepository.IsOnDevelopBranch()}");
-            Logger.Info($"IsOnMasterBranch Value: {GitRepository.IsOnMasterBranch()}");
-            Logger.Info($"IsDevelop Value: {IsDevelop()}");
-            Logger.Info($"IsMaster Value: {IsMaster()}");
-
             var settings = new DotNetBuildSettings()
                 .SetProjectFile(UbietyLoggingCoreProject)
                 .SetConfiguration(Configuration)
