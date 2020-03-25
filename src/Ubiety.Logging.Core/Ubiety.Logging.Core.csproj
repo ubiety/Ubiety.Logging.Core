@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="images\logs64.png" Pack="true" PackagePath="\" />
+    <None Include="..\..\images\logs64.png" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
