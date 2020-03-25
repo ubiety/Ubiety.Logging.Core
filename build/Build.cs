@@ -28,7 +28,6 @@ class Build : NukeBuild
     [GitVersion(DisableOnUnix = true)] readonly GitVersion GitVersion;
 
     readonly string NuGetSource = "https://api.nuget.org/v3/index.json";
-    [Parameter] readonly string NuGetVersion;
 
     [Solution] readonly Solution Solution;
 
